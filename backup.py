@@ -1,25 +1,65 @@
-import urllib.request
-import requests
 import json
+import requests
+import urllib.request
+
+from time import time
 
 class Backup:
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, url_list):
+        self.url_list = url_list
+        self.user_dict = dict()
         self.channel_list = list()
+        self.send_data = list()
 
-    def get_list(self):
-        req_url = self.url
+    def get_channels(self):
+        req_url = self.url_list
         print(req_url)
         response = urllib.request.urlopen(req_url)
         str_response = response.read().decode('utf-8')
-        opt = json.loads(str_response)
-        for channel in opt['channels']:
+        obj = json.loads(str_response)
+        for channel in obj['channels']:
             channel_dict = dict()
             channel_dict['id'] = channel['id']
             channel_dict['name'] = channel['name']
             self.channel_list.append(channel_dict)
-        print (self.channel_list)
+#        print (self.channel_list)
 #        print(json.dumps(obj,sort_keys=True, indent=4, separators=(',', ': ')))
+
+    def get_users(self):
+        req_url = "https://slack.com/api/users.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&channel"
+        print (req_url)
+        response = urllib.request.urlopen(req_url)
+        str_response = response.read().decode('utf-8')
+        obj = json.loads(str_response)
+        for member in obj['members']:
+            self.user_dict[member['id']] = member['name']
+
+    def get_message(self):
+        for channel in self.channel_list:
+            channel_data = dict()
+            channel_data['channel_name'] = channel['name']
+            channel_data['messages'] = list()
+            latest = time()
+            while True:
+                req_url = "https://slack.com/api/channels.history?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&channel=" + channel['id']\
+                                + "&latest=" + str(latest)\
+                                + "&count=1000"
+                print (req_url)
+                response = urllib.request.urlopen(req_url)
+                str_response = response.read().decode('utf-8')
+                obj = json.loads(str_response)
+                for message in obj['messages']:
+                    print (message)
+                    message_dict = dict()
+                    message_dict['user'] = self.user_dict[message['user']]
+                    message_dict['text'] = message['text']
+                    message_dict['ts'] = message['ts']
+                    channel_data['messages'].append(message_dict)
+                print (channel_data['messages'])
+                if obj['has_more']:
+                    latest = obj['messages'][0]['ts']
+                else:
+                    break
 
     def send(self):
         return requests.post(
@@ -33,7 +73,9 @@ class Backup:
 def main():
    b = Backup('https://slack.com/api/channels.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&pretty=1')
 #   b.send()
-   b.get_list()
+   b.get_channels()
+   b.get_users()
+   b.get_message()
 
 if __name__ == '__main__':
     main()
