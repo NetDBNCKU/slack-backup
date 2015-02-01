@@ -1,5 +1,5 @@
-import requests
 import urllib.request
+import requests
 import json
 
 class Backup:
@@ -34,8 +34,6 @@ def main():
    b = Backup('https://slack.com/api/channels.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&pretty=1')
 #   b.send()
    b.get_list()
-
-
 
 if __name__ == '__main__':
     main()
