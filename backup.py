@@ -51,20 +51,26 @@ class Backup:
                 str_response = response.read().decode('utf-8')
                 obj = json.loads(str_response)
                 for message in obj['messages']:
-                    print (json.dumps(message,sort_keys=True, indent=4, separators=(',', ': ')))
+#                    print (json.dumps(message,sort_keys=True, indent=4, separators=(',', ': ')))
                     message_dict = dict()
                     try:
                         message_dict['user'] = self.user_dict[message['user']]
                     except:
-                        message_dict['user'] = self.user_dict[message['comment']['user']]
+                        if "username" in list(message.keys()):
+                            message_dict['user'] = message['username']
+                        elif "bot_id" in list(message.keys()):
+                            message_dict['user'] = message['bot_id']
+                        else:
+                            message_dict['user'] = self.user_dict[message['comment']['user']] # Comment post
                     message_dict['text'] = message['text']
                     message_dict['ts'] = message['ts']
                     channel_data['messages'].append(message_dict)
-                print (json.dumps(channel_data['messages'],sort_keys=True, indent=4, separators=(',', ': ')))
+#                print (json.dumps(channel_data['messages'],sort_keys=True, indent=4, separators=(',', ': ')))
                 if obj['has_more']:
                     latest = obj['messages'][0]['ts']
                 else:
                     break
+            self.send_data.append(channel_data)
 
     def send(self):
         return requests.post(
@@ -72,15 +78,15 @@ class Backup:
             auth=("api", "key-fd78805af31e5a60d8ef0fe9587e2fdd"),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
                   "to": ["yangpoan@gmail.com"],
-                  "subject": "Hello ArvinH",
-                  "text": "Congratulations ArvinH, you just sent an email with Mailgun!  You are truly awesome!  You can see a record of this email in your logs: https://mailgun.com/cp/log .  You can send up to 300 emails/day from this sandbox server.  Next, you should add your own domain so you can send 10,000 emails/month for free."})
+                  "subject": "Slack Backup",
+                  "text": str(self.send_data)})
 
 def main():
    b = Backup('https://slack.com/api/channels.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&pretty=1')
-#   b.send()
    b.get_channels()
    b.get_users()
    b.get_message()
+   b.send()
 
 if __name__ == '__main__':
     main()
