@@ -14,7 +14,7 @@ class Backup:
     def send(self):
         return requests.post(
               "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
-              auth=("api", "key-fd78805af31e5a60d8ef0fe9587e2fdd"),
+              auth=("api", ""),
               data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
                   "to": "ArvinH <arvin0731@gmail.com>",
                   "subject": "Hello ArvinH",
