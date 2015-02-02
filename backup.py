@@ -49,13 +49,13 @@ class Backup:
                 str_response = response.read().decode('utf-8')
                 obj = json.loads(str_response)
                 for message in obj['messages']:
-                    print (message)
+                    print (json.dumps(message,sort_keys=True, indent=4, separators=(',', ': ')))
                     message_dict = dict()
                     message_dict['user'] = self.user_dict[message['user']]
                     message_dict['text'] = message['text']
                     message_dict['ts'] = message['ts']
                     channel_data['messages'].append(message_dict)
-                print (channel_data['messages'])
+                print (json.dumps(channel_data['messages'],sort_keys=True, indent=4, separators=(',', ': ')))
                 if obj['has_more']:
                     latest = obj['messages'][0]['ts']
                 else:
