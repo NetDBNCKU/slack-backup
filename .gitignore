@@ -55,3 +55,6 @@ target/
 
 # mailgun
 mailgun.txt
+
+# Slack token
+slack_token.txt
