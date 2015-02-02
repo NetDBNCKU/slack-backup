@@ -5,15 +5,20 @@ import urllib.request
 from time import time
 
 class Backup:
-    def __init__(self, url_list):
-        self.url_list = url_list
+    def __init__(self):
+        self.token = str()
         self.user_dict = dict()
         self.channel_list = list()
         self.send_data = list()
         self.mailgun_key = str()
 
+    def get_token(self):
+        file = open('slack_token.txt', 'r')
+        self.token = file.readline()[:-1]
+        file.close()
+
     def get_channels(self):
-        req_url = self.url_list
+        req_url = "https://slack.com/api/channels.list?token=" + self.token + "&pretty=1"
         print(req_url)
         response = urllib.request.urlopen(req_url)
         str_response = response.read().decode('utf-8')
@@ -27,7 +32,7 @@ class Backup:
 #        print(json.dumps(obj,sort_keys=True, indent=4, separators=(',', ': ')))
 
     def get_users(self):
-        req_url = "https://slack.com/api/users.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&channel"
+        req_url = "https://slack.com/api/users.list?token=" + self.token
         print (req_url)
         response = urllib.request.urlopen(req_url)
         str_response = response.read().decode('utf-8')
@@ -44,7 +49,8 @@ class Backup:
             channel_data['messages'] = list()
             latest = time()
             while True:
-                req_url = "https://slack.com/api/channels.history?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&channel=" + channel['id']\
+                req_url = "https://slack.com/api/channels.history?token=" + self.token\
+                                + "&channel=" + channel['id']\
                                 + "&latest=" + str(latest)\
                                 + "&count=1000"
                 print (req_url)
@@ -75,7 +81,7 @@ class Backup:
 
     def get_mailgun_key(self):
         file = open('mailgun.txt', 'r')
-        self.mailgun_key = file.readline()
+        self.mailgun_key = file.readline()[:-1]
         file.close()
 
     def send(self):
@@ -88,7 +94,8 @@ class Backup:
                   "text": str(self.send_data)})
 
 def main():
-   b = Backup('https://slack.com/api/channels.list?token=xoxp-3273763636-3508525695-3580135383-bd3aa9&pretty=1')
+   b = Backup()
+   b.get_token()
    b.get_channels()
    b.get_users()
    b.get_message()
