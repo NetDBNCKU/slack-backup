@@ -33,6 +33,8 @@ class Backup:
         obj = json.loads(str_response)
         for member in obj['members']:
             self.user_dict[member['id']] = member['name']
+        self.user_dict['USLACKBOT'] = "slackbot"
+#        print (json.dumps(obj, sort_keys=True, indent=4, separators=(',', ": ")))
 
     def get_message(self):
         for channel in self.channel_list:
@@ -51,7 +53,10 @@ class Backup:
                 for message in obj['messages']:
                     print (json.dumps(message,sort_keys=True, indent=4, separators=(',', ': ')))
                     message_dict = dict()
-                    message_dict['user'] = self.user_dict[message['user']]
+                    try:
+                        message_dict['user'] = self.user_dict[message['user']]
+                    except:
+                        message_dict['user'] = self.user_dict[message['comment']['user']]
                     message_dict['text'] = message['text']
                     message_dict['ts'] = message['ts']
                     channel_data['messages'].append(message_dict)
