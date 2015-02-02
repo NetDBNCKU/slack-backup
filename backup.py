@@ -10,6 +10,7 @@ class Backup:
         self.user_dict = dict()
         self.channel_list = list()
         self.send_data = list()
+        self.mailgun_key = str()
 
     def get_channels(self):
         req_url = self.url_list
@@ -72,10 +73,15 @@ class Backup:
                     break
             self.send_data.append(channel_data)
 
+    def get_mailgun_key(self):
+        file = open('mailgun.txt', 'r')
+        self.mailgun_key = file.readline()
+        file.close()
+
     def send(self):
         return requests.post(
             "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
-            auth=("api", "key-fd78805af31e5a60d8ef0fe9587e2fdd"),
+            auth=("api", self.mailgun_key),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
                   "to": ["yangpoan@gmail.com"],
                   "subject": "Slack Backup",
@@ -86,6 +92,7 @@ def main():
    b.get_channels()
    b.get_users()
    b.get_message()
+   b.get_mailgun_key()
    b.send()
 
 if __name__ == '__main__':
