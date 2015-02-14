@@ -12,6 +12,7 @@ class Backup:
         self.channel_list = list()
         self.send_data = list()
         self.mailgun_key = str()
+        self.mandrill_key = str()
 
     def get_token(self):
         file = open('slack_token.txt', 'r')
@@ -85,14 +86,42 @@ class Backup:
         self.mailgun_key = file.readline()[:-1]
         file.close()
 
+    def get_mandrill_key(self):
+        file = open('mandrill.txt', 'r')
+        self.mandrill_key = file.readline()[:-1]
+        file.close()
+
     def send(self):
         return requests.post(
             "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
             auth=("api", self.mailgun_key),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
-                  "to": ["arvin0731@gmail.com"],
+                  "to": ["arvin0731@gmail.com","ktchuang@gmail.com"],
                   "subject": "Slack Backup",
                   "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': ')) })
+
+    def send_mail(self,template_name, email_to):
+        print(self.mandrill_key)
+        try:
+                mandrill_client = mandrill.Mandrill(self.mandrill_key) 
+                message = {
+                        'to': [],
+                        'global_merge_vars': []
+                }
+                for em in email_to:
+                     message['to'].append({'email': em})
+ 
+                message['global_merge_vars'].append([json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '))])
+                mandrill_client.messages.send(message=message,async=False, ip_pool='Main Pool')
+                
+
+        except mandrill.Error:
+    		# Mandrill errors are thrown as exceptions
+                print("got some error from mandrill")
+    		# A mandrill error occurred: <class 'mandrill.UnknownSubaccountError'> - No subaccount exists with the id 'customer-123'    
+    	        raise 
+ 
+	
 
 def main():
    b = Backup()
@@ -102,6 +131,8 @@ def main():
    b.get_message()
    b.get_mailgun_key()
    b.send()
+   b.get_mandrill_key()
+   b.send_mail('template-1', ["arvin0731@gmail.com"])
 
 if __name__ == '__main__':
     main()
