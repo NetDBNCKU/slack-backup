@@ -98,7 +98,7 @@ class Backup:
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
                   "to": ["arvin0731@gmail.com","ktchuang@gmail.com"],
                   "subject": "Slack Backup",
-                  "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': ')) })
+                  "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False) })
 
     def send_mail(self,template_name, email_to):
         print(self.mandrill_key)
@@ -118,8 +118,7 @@ class Backup:
         except mandrill.Error:
     		# Mandrill errors are thrown as exceptions
                 print("got some error from mandrill")
-    		# A mandrill error occurred: <class 'mandrill.UnknownSubaccountError'> - No subaccount exists with the id 'customer-123'    
-    	        raise 
+                raise
  
 	
 
