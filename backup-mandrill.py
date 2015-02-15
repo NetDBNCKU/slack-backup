@@ -94,6 +94,7 @@ class Backup:
         file = open('latest_backup_time.txt','r')
         self.oldest = file.readline()[:-1]
         file.close()
+        return self.oldest
 
     def get_mailgun_key(self):
         file = open('mailgun.txt', 'r')
@@ -110,7 +111,7 @@ class Backup:
             "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
             auth=("api", self.mailgun_key),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
-                  "to": ["arvin0731@gmail.com"],
+                  "to": ["arvin0731@gmail.com","ktchuang@gmail.com"],
                   "subject": "Slack Backup",
                   "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False) })
             #"ktchuang@gmail.com"
