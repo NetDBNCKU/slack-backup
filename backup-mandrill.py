@@ -47,13 +47,13 @@ class Backup:
 #        print (json.dumps(obj, sort_keys=True, indent=4, separators=(',', ": ")))
 
     def get_message(self):
+        self.oldest = self.get_latest_backup_time()
+        self.latestTime = time()
+        self.set_latest_backup_time()
         for channel in self.channel_list:
             channel_data = dict()
             channel_data['channel_name'] = channel['name']
             channel_data['messages'] = list()
-            self.oldest = self.get_latest_backup_time()
-            self.latestTime = time()
-            self.set_latest_backup_time()
             while True:
                 req_url = "https://slack.com/api/channels.history?token=" + self.token\
                                 + "&channel=" + channel['id']\
