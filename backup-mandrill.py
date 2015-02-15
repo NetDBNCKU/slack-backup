@@ -53,12 +53,12 @@ class Backup:
             channel_data['messages'] = list()
             self.oldest = self.get_latest_backup_time()
             self.latestTime = time()
-            self.set_latest_backup_time(self.latestTime)
+            self.set_latest_backup_time()
             while True:
                 req_url = "https://slack.com/api/channels.history?token=" + self.token\
                                 + "&channel=" + channel['id']\
-                                + "&latest=" + str(self.latestTime)\
                                 + "&oldest=" + str(self.oldest)\
+                                + "&latest=" + str(self.latestTime)\
                                 + "&count=1000"
                 print (req_url)
                 response = urllib.request.urlopen(req_url)
@@ -87,7 +87,7 @@ class Backup:
             self.send_data.append(channel_data)
     def set_latest_backup_time(self):
         file = open('latest_backup_time.txt','w')
-        file.write(self.latestTime)
+        file.write(str(self.latestTime))
         file.close()
 
     def get_latest_backup_time(self):
