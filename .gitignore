@@ -58,3 +58,6 @@ mailgun.txt
 
 # Slack token
 slack_token.txt
+
+#mandrill
+mandrill.txt
