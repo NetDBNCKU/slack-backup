@@ -13,6 +13,8 @@ class Backup:
         self.send_data = list()
         self.mailgun_key = str()
         self.mandrill_key = str()
+        self.latestTime = time()
+        self.oldest = str()
 
     def get_token(self):
         file = open('slack_token.txt', 'r')
@@ -49,11 +51,14 @@ class Backup:
             channel_data = dict()
             channel_data['channel_name'] = channel['name']
             channel_data['messages'] = list()
-            latest = time()
+            self.oldest = self.get_latest_backup_time()
+            self.latestTime = time()
+            self.set_latest_backup_time(self.latestTime)
             while True:
                 req_url = "https://slack.com/api/channels.history?token=" + self.token\
                                 + "&channel=" + channel['id']\
-                                + "&latest=" + str(latest)\
+                                + "&latest=" + str(self.latestTime)\
+                                + "&oldest=" + str(self.oldest)\
                                 + "&count=1000"
                 print (req_url)
                 response = urllib.request.urlopen(req_url)
@@ -80,6 +85,15 @@ class Backup:
                 else:
                     break
             self.send_data.append(channel_data)
+    def set_latest_backup_time(self):
+        file = open('latest_backup_time.txt','w')
+        file.write(self.latestTime)
+        file.close()
+
+    def get_latest_backup_time(self):
+        file = open('latest_backup_time.txt','r')
+        self.oldest = file.readline()[:-1]
+        file.close()
 
     def get_mailgun_key(self):
         file = open('mailgun.txt', 'r')
@@ -96,9 +110,10 @@ class Backup:
             "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
             auth=("api", self.mailgun_key),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
-                  "to": ["arvin0731@gmail.com","ktchuang@gmail.com"],
+                  "to": ["arvin0731@gmail.com"],
                   "subject": "Slack Backup",
                   "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False) })
+            #"ktchuang@gmail.com"
 
     def send_mail(self,template_name, email_to):
         print(self.mandrill_key)
