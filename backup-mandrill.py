@@ -17,7 +17,7 @@ class Backup:
         self.oldest = str()
 
     def get_token(self):
-        file = open('slack_token.txt', 'r')
+        file = open('/home/arvin/slack-backup/slack_token.txt', 'r')
         self.token = file.readline()[:-1]
         file.close()
 
@@ -86,23 +86,23 @@ class Backup:
                     break
             self.send_data.append(channel_data)
     def set_latest_backup_time(self):
-        file = open('latest_backup_time.txt','w')
+        file = open('/home/arvin/slack-backup/latest_backup_time.txt','w')
         file.write(str(self.latestTime))
         file.close()
 
     def get_latest_backup_time(self):
-        file = open('latest_backup_time.txt','r')
+        file = open('/home/arvin/slack-backup/latest_backup_time.txt','r')
         self.oldest = file.readline()[:-1]
         file.close()
         return self.oldest
 
     def get_mailgun_key(self):
-        file = open('mailgun.txt', 'r')
+        file = open('/home/arvin/slack-backup/mailgun.txt', 'r')
         self.mailgun_key = file.readline()[:-1]
         file.close()
 
     def get_mandrill_key(self):
-        file = open('mandrill.txt', 'r')
+        file = open('/home/arvin/slack-backup/mandrill.txt', 'r')
         self.mandrill_key = file.readline()[:-1]
         file.close()
 
