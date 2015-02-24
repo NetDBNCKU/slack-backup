@@ -1,5 +1,6 @@
 import json
 import requests
+import subprocess
 import urllib.request
 import mandrill
 
@@ -15,9 +16,15 @@ class Backup:
         self.mandrill_key = str()
         self.latestTime = time()
         self.oldest = str()
+        self.now_path = str()
+
+    def get_pwd(self):
+        self.now_path = subprocess.check_output("pwd", shell=True)
+        self.now_path = self.now_path.decode('utf-8')[:-1]
+#        print (self.now_path)
 
     def get_token(self):
-        file = open('/home/arvin/slack-backup/slack_token.txt', 'r')
+        file = open(self.now_path + '/slack_token.txt', 'r')
         self.token = file.readline()[:-1]
         file.close()
 
@@ -86,23 +93,23 @@ class Backup:
                     break
             self.send_data.append(channel_data)
     def set_latest_backup_time(self):
-        file = open('/home/arvin/slack-backup/latest_backup_time.txt','w')
+        file = open(self.now_path + '/latest_backup_time.txt','w')
         file.write(str(self.latestTime))
         file.close()
 
     def get_latest_backup_time(self):
-        file = open('/home/arvin/slack-backup/latest_backup_time.txt','r')
+        file = open(self.now_path + '/latest_backup_time.txt','r')
         self.oldest = file.readline()[:-1]
         file.close()
         return self.oldest
 
     def get_mailgun_key(self):
-        file = open('/home/arvin/slack-backup/mailgun.txt', 'r')
+        file = open(self.now_path + '/mailgun.txt', 'r')
         self.mailgun_key = file.readline()[:-1]
         file.close()
 
     def get_mandrill_key(self):
-        file = open('/home/arvin/slack-backup/mandrill.txt', 'r')
+        file = open(self.now_path + '/mandrill.txt', 'r')
         self.mandrill_key = file.readline()[:-1]
         file.close()
 
@@ -119,27 +126,28 @@ class Backup:
     def send_mail(self,template_name, email_to):
         print(self.mandrill_key)
         try:
-                mandrill_client = mandrill.Mandrill(self.mandrill_key) 
+                mandrill_client = mandrill.Mandrill(self.mandrill_key)
                 message = {
                         'to': [],
                         'global_merge_vars': []
                 }
                 for em in email_to:
                      message['to'].append({'email': em})
- 
+
                 message['global_merge_vars'].append([json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '))])
                 mandrill_client.messages.send(message=message,async=False, ip_pool='Main Pool')
-                
+
 
         except mandrill.Error:
     		# Mandrill errors are thrown as exceptions
                 print("got some error from mandrill")
                 raise
- 
-	
+
+
 
 def main():
    b = Backup()
+   b.get_pwd()
    b.get_token()
    b.get_channels()
    b.get_users()
