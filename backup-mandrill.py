@@ -25,7 +25,7 @@ class Backup:
 #        print (self.now_path)
 
     def get_token(self):
-        file = open(self.now_path + '/slack_token.txt', 'r')
+        file = open(self.now_path + '/slack-backup/slack_token.txt', 'r')
         self.token = file.readline()[:-1]
         file.close()
 
@@ -119,9 +119,9 @@ class Backup:
             while True:
                 req_url = "https://slack.com/api/groups.history?token=" + self.token\
                                 + "&channel=" + channel['id']\
-                                + "&oldest=" + str(self.oldest)\
                                 + "&latest=" + str(self.latestTime)\
                                 + "&count=1000"
+                                #+ "&oldest=" + str(self.oldest)\
                 print (req_url)
                 response = urllib.request.urlopen(req_url)
                 str_response = response.read().decode('utf-8')
@@ -150,24 +150,19 @@ class Backup:
             self.send_data.append(channel_data)
 
     def set_latest_backup_time(self):
-        file = open(self.now_path + '/latest_backup_time.txt','w')
+        file = open(self.now_path + '/slack-backup/latest_backup_time.txt','w')
         file.write(str(self.latestTime))
         file.close()
 
     def get_latest_backup_time(self):
-        file = open(self.now_path + '/latest_backup_time.txt','r')
+        file = open(self.now_path + '/slack-backup/latest_backup_time.txt','r')
         self.oldest = file.readline()[:-1]
         file.close()
         return self.oldest
 
     def get_mailgun_key(self):
-        file = open(self.now_path + '/mailgun.txt', 'r')
+        file = open(self.now_path + '/slack-backup/mailgun.txt', 'r')
         self.mailgun_key = file.readline()[:-1]
-        file.close()
-
-    def get_mandrill_key(self):
-        file = open(self.now_path + '/mandrill.txt', 'r')
-        self.mandrill_key = file.readline()[:-1]
         file.close()
 
     def send(self):
@@ -175,31 +170,20 @@ class Backup:
             "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
             auth=("api", self.mailgun_key),
             data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
-                  "to": ["arvin0731@gmail.com","ktchuang@gmail.com","yangpoan@gmail.com"],
+                  "to": ["arvin0731@gmail.com","bohengorz@gmail.com","ktchuang@gmail.com","kao.cheng.lee@gmail.com","poanyang.tw@gmail.com","chihsuan.tw@gmail.com","chengmao.hsu@gmail.com","peihsuanhsieh.ncku@gmail.com","TzuYuan.Chung@gmail.com","yenkuanlee@gmail.com","cdchen@netdb.csie.ncku.edu.tw","cwchang.ncku@gmail.com","sydang.ncku@gmail.com","walt.su@gmail.com"],
                   "subject": "Slack Backup",
                   "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False) })
-            #"ktchuang@gmail.com"
+            #"ktchuang@gmail.com","ktchuang@gmail.com","yangpoan@gmail.com"
 
-    def send_mail(self,template_name, email_to):
-        print(self.mandrill_key)
-        try:
-                mandrill_client = mandrill.Mandrill(self.mandrill_key)
-                message = {
-                        'to': [],
-                        'global_merge_vars': []
-                }
-                for em in email_to:
-                     message['to'].append({'email': em})
-
-                message['global_merge_vars'].append([json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '))])
-                mandrill_client.messages.send(message=message,async=False, ip_pool='Main Pool')
-
-
-        except mandrill.Error:
-    		# Mandrill errors are thrown as exceptions
-                print("got some error from mandrill")
-                raise
-
+    def send_private(self):
+        return requests.post(
+            "https://api.mailgun.net/v2/sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org/messages",
+            auth=("api", self.mailgun_key),
+            data={"from": "Mailgun Sandbox <postmaster@sandbox3b110172ed844490b95b97eb9ef9c178.mailgun.org>",
+                  "to": ["arvin0731@gmail.com"],
+                  "subject": "Slack Backup",
+                  "text": json.dumps(self.send_data,sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False) })
+            #"ktchuang@gmail.com","ktchuang@gmail.com","yangpoan@gmail.com"
 
 
 def main():
@@ -220,6 +204,6 @@ def main():
     b_private.get_private_channels()
     b_private.get_users()
     b_private.get_private_message()
-    b_private.send()
+    b_private.send_private()
 if __name__ == '__main__':
     main()
